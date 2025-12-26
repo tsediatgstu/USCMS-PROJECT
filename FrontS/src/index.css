@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* This replaces the 'darkMode: class' setting from the old config */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    /* This ensures your background actually changes color */
+    background-color: #ffffff;
+    color: #111827;
+    transition-property: color, background-color;
+    transition-duration: 300ms;
+  }
+
+  /* Dark mode overrides (when .dark class is present on the root) */
+  :where(.dark) body,
+  :where(.dark) body * {
+    background-color: #030712;
+    color: #f3f4f6;
+  }
+}
