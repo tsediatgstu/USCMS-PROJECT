@@ -22,33 +22,29 @@ const Login = () => {
     setStatus({ type: '', message: '' });
     setLoading(true);
 
-    // --- 1. ADMIN LOGIN LOGIC ---
-    if (role === 'admin') {
-      if (formData.email === 'tsediatgstu@gmail.com' && formData.password === '123@') {
-        setStatus({ type: 'success', message: '✅ Admin Access Granted!' });
-        const adminUser = { email: 'tsediatgstu@gmail.com', role: 'admin' };
-        login(adminUser, 'admin-token-secure'); 
-        setTimeout(() => navigate('/admin'), 1000);
-      } else {
-        setStatus({ type: 'error', message: '❌ Invalid Admin Credentials.' });
-        setLoading(false);
-      }
-      return;
-    }
-
-    // --- 2. STUDENT LOGIN LOGIC (Direct Redirect) ---
     try {
       const res = await API.post('/auth/login', { ...formData, role });
       const { user, token } = res.data;
 
+      // Check role matches selected portal
+      if (user.role !== role) {
+        setStatus({ type: 'error', message: `❌ This account is not a ${role} account.` });
+        setLoading(false);
+        return;
+      }
+
       login(user, token);
-      setStatus({ type: 'success', message: '✅ Success! Entering Student Dashboard...' });
-      
-      // Direct Navigation to Student Dashboard
-      setTimeout(() => navigate('/student-dashboard'), 800);
+
+      if (user.role === 'admin') {
+        setStatus({ type: 'success', message: '✅ Admin Access Granted!' });
+        setTimeout(() => navigate('/admin'), 1000);
+      } else {
+        setStatus({ type: 'success', message: '✅ Success! Entering Student Dashboard...' });
+        setTimeout(() => navigate('/student-dashboard'), 800);
+      }
 
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "";
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || '';
       setStatus({ 
         type: 'error', 
         message: errorMsg.toLowerCase().includes("not found") 
@@ -120,7 +116,7 @@ const Login = () => {
             />
           </div>
 
-          {/* SIDE-BY-SIDE BUTTONS */}
+          {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <button
               type="submit"

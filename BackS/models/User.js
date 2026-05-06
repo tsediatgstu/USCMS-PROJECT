@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 
-const ComplaintSchema = new mongoose.Schema({
-  studentId: { type: String, required: true },
-  subject: { type: String, required: true },
-  message: { type: String, required: true },
-  attachment: { type: String, default: null }, // Ensure this exists
-  status: { type: String, default: 'pending' },
-  createdAt: { type: Date, default: Date.now }
-});
+const userSchema = new mongoose.Schema({
+  studentId: { type: String, unique: true, sparse: true },
+  name:      { type: String, required: true },
+  email:     { type: String, required: true, unique: true },
+  password:  { type: String, required: true },
+  role:      { type: String, enum: ['student', 'admin'], default: 'student' }
+}, { timestamps: true });
 
-module.exports = mongoose.model('Complaint', ComplaintSchema);
+module.exports = mongoose.model('User', userSchema);

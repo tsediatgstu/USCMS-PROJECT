@@ -9,8 +9,8 @@ import {
 const Register = () => {
   const [form, setForm] = useState({ 
     studentId: '', 
-    username: '', // Full Name
-    email: '',    // Gmail
+    username: '',
+    email: '',
     department: '', 
     password: '' 
   });
@@ -40,11 +40,20 @@ const Register = () => {
     
     setLoading(true);
     try {
-      const response = await API.post('/auth/register', form);
-      alert(response.data.message); 
+      // ✅ MAP username → name before sending to backend
+      const payload = {
+        studentId: form.studentId,
+        name: form.username,        // ← KEY FIX
+        email: form.email,
+        department: form.department,
+        password: form.password,
+      };
+
+      const response = await API.post('/auth/register', payload);
+      alert(response.data.message || 'Registration successful!'); 
       navigate('/login');
     } catch (err) { 
-      const msg = err.response?.data?.message || "Registration failed";
+      const msg = err.response?.data?.error || err.response?.data?.message || "Registration failed";
       alert(msg); 
     } finally {
       setLoading(false);
@@ -53,12 +62,11 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-gray-950 p-4 transition-all">
-      {/* 1. Integrated the Glass Effect & Animation Wrapper */}
       <div className="glass-effect animate-float w-full max-w-xl bg-white/80 dark:bg-gray-900/80 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
         
         {/* Header */}
         <div className="p-10 pb-6 text-center">
-          <div className="inline-flex p-4 bg-blue-600 text-white rounded-3xl mb-6 shadow-lg shadow-blue-500/30" role="img" aria-label="Registration Icon">
+          <div className="inline-flex p-4 bg-blue-600 text-white rounded-3xl mb-6 shadow-lg shadow-blue-500/30">
             <UserPlus size={32} />
           </div>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Student Registration</h2>
@@ -76,11 +84,9 @@ const Register = () => {
                 <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600" size={16} />
                 <input 
                   id="studentId"
-                  name="studentId"
                   type="text" 
                   required 
                   placeholder="Enter Student ID"
-                  title="Student ID"
                   className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 dark:bg-gray-800 dark:text-white outline-none focus:border-blue-600 transition-all text-sm"
                   value={form.studentId} 
                   onChange={handleIdChange} 
@@ -88,18 +94,16 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Email (Gmail) */}
+            {/* Email */}
             <div className="space-y-1">
               <label htmlFor="email" className="text-[10px] font-black uppercase text-gray-400 ml-1">Email (Gmail)</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600" size={16} />
                 <input 
                   id="email"
-                  name="email"
                   type="email" 
                   required 
                   placeholder="name@gmail.com"
-                  title="Gmail Address"
                   className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 dark:bg-gray-800 dark:text-white outline-none focus:border-blue-600 transition-all text-sm"
                   value={form.email} 
                   onChange={e => setForm({...form, email: e.target.value})} 
@@ -108,18 +112,16 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Full Name (username) */}
+          {/* Full Name */}
           <div className="space-y-1">
             <label htmlFor="username" className="text-[10px] font-black uppercase text-gray-400 ml-1">Full Name</label>
             <div className="relative group">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600" size={16} />
               <input 
                 id="username"
-                name="username"
                 type="text" 
                 required 
                 placeholder="Enter Full Name"
-                title="Full Name"
                 className="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 dark:bg-gray-800 dark:text-white outline-none focus:border-blue-600 transition-all text-sm"
                 value={form.username} 
                 onChange={e => setForm({...form, username: e.target.value})} 
@@ -134,9 +136,7 @@ const Register = () => {
               <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <select 
                 id="department"
-                name="department"
                 required
-                title="Select Department"
                 className="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 dark:bg-gray-800 dark:text-white outline-none appearance-none cursor-pointer text-sm"
                 value={form.department} 
                 onChange={e => setForm({...form, department: e.target.value})}
@@ -154,11 +154,9 @@ const Register = () => {
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600" size={16} />
               <input 
                 id="password"
-                name="password"
                 type={showPassword ? "text" : "password"} 
                 required 
                 placeholder="••••••••" 
-                title="Password"
                 className="w-full pl-11 pr-12 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 dark:bg-gray-800 dark:text-white outline-none focus:border-blue-600 transition-all text-sm" 
                 value={form.password} 
                 onChange={e => setForm({...form, password: e.target.value})} 
@@ -167,14 +165,13 @@ const Register = () => {
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)} 
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button 
             type="submit" 
             disabled={loading}
@@ -187,7 +184,7 @@ const Register = () => {
         {/* Footer */}
         <div className="bg-gray-50 dark:bg-gray-800/30 p-8 text-center border-t border-gray-100 dark:border-gray-800">
           <p className="text-gray-500 text-sm">
-            Already have an account? {' '}
+            Already have an account?{' '}
             <Link to="/login" className="text-blue-600 font-black hover:underline underline-offset-4 decoration-2">
               Sign In Now
             </Link>
